@@ -27,3 +27,22 @@
 *.exe
 *.out
 *.app
+
+# log files
+*.log
+
+# autotools
+Makefile.in
+/autom4te.cache
+/autoscan.log
+/autoscan-*.log
+/aclocal.m4
+/compile
+/config.h.in
+/config.status
+/configure
+/configure.scan
+/depcomp
+/install-sh
+/missing
+/stamp-h1
