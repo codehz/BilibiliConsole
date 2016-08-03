@@ -26,7 +26,12 @@ libvlc_instance_t *         custom_pointer<libvlc_instance_t>::     Create() {
         "--no-xlib", // Don't use Xlib.
     };
     int vlc_argc = sizeof(vlc_argv) / sizeof(*vlc_argv);
-    return libvlc_new(vlc_argc, vlc_argv);
+    auto ret = libvlc_new(vlc_argc, vlc_argv);
+    if (!ret) {
+        std::cerr << "Couldn't init libvlc:" << SDL_GetError();
+        throw "Couldn't init libvlc";
+    }
+    return ret;
 }
 template<>
 void                        custom_pointer<libvlc_instance_t>::     Destroy(libvlc_instance_t *t) {

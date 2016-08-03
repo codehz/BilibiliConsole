@@ -56,6 +56,7 @@ class PlayerImpl : public Player, SDLInit {
         }
     public:
         PlayerImpl(const PlayerHook &hook) : hook(hook), window(basicInfo), renderer(window), texture(basicInfo, renderer), vlcPlayer(nullptr) {}
+
         void load(std::string location) {
             custom_pointer<libvlc_media_t> media(libvlc, location);
             vlcPlayer = custom_pointer<libvlc_media_player_t>(media);
