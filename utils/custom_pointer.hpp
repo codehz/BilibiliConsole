@@ -1,5 +1,8 @@
 #pragma once
 
+class NotImplementedException {
+};
+
 //JUST FOR SIMPLIFY DESTORY
 template<typename T>
 class custom_pointer {
@@ -47,7 +50,11 @@ class custom_pointer {
         }
         
         template<typename ...Values> T *Create(Values ...v) {
-            throw;
+            throw NotImplementedException();
+        }
+        
+        T *Create(decltype(nullptr) n) {
+            return nullptr;
         }
 
         T *Create(T *t) {

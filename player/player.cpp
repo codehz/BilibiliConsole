@@ -28,14 +28,14 @@ using vlc_display = void (*)(void *, void *id);
 
 class PlayerImpl : public Player, SDLInit {
     private:
-        const PlayerHook &                      hook;
-        const BasicInfo                         basicInfo;
-        const custom_pointer<libvlc_instance_t> libvlc;
-        custom_pointer<SDL_Window>              window;
-        custom_pointer<SDL_Renderer>            renderer;
-        custom_pointer<SDL_Texture>             texture;
-        custom_pointer<SDL_mutex>               mutex;
-        custom_pointer<libvlc_media_player_t>   vlcPlayer;
+        const PlayerHook &                  hook;
+        BasicInfo                           basicInfo;
+        custom_pointer<libvlc_instance_t>   libvlc;
+        custom_pointer<SDL_Window>          window;
+        custom_pointer<SDL_Renderer>        renderer;
+        custom_pointer<SDL_Texture>         texture;
+        custom_pointer<SDL_mutex>           mutex;
+        custom_pointer<libvlc_media_player_t> vlcPlayer;
 
         nullptr_t lock(void **p_pixels) {
             int pitch;

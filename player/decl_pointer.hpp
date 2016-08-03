@@ -59,7 +59,7 @@ void                        custom_pointer<libvlc_media_player_t>:: Destroy(libv
 //SDL_Window
 template<>
 template<>
-SDL_Window *                custom_pointer<SDL_Window>::            Create<const BasicInfo &>(const BasicInfo &basicInfo) {
+SDL_Window *                custom_pointer<SDL_Window>::            Create<BasicInfo>(BasicInfo basicInfo) {
     auto ret = SDL_CreateWindow("BiliBiliConsole Player", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, basicInfo.vinfo.xres, basicInfo.vinfo.yres, SDL_WINDOW_SHOWN);
     if (!ret) {
         std::cerr << "Couldn't create window:" << SDL_GetError();
@@ -75,7 +75,7 @@ void                        custom_pointer<SDL_Window>::            Destroy(SDL_
 //SDL_Renderer
 template<>
 template<>
-SDL_Renderer *              custom_pointer<SDL_Renderer>::          Create<SDL_Window *>(SDL_Window *window) {
+SDL_Renderer *              custom_pointer<SDL_Renderer>::          Create<custom_pointer<SDL_Window>>(custom_pointer<SDL_Window> window) {
     auto ret = SDL_CreateRenderer(window, -1, 0);
     if (!ret) {
         std::cerr << "Couldn't create renderer:" << SDL_GetError();
@@ -91,7 +91,7 @@ void                        custom_pointer<SDL_Renderer>::          Destroy(SDL_
 //SDL_Texture
 template<>
 template<>
-SDL_Texture *               custom_pointer<SDL_Texture>::           Create<const BasicInfo &, SDL_Renderer *>(const BasicInfo &basicInfo, SDL_Renderer *renderer) {
+SDL_Texture *               custom_pointer<SDL_Texture>::           Create<BasicInfo, custom_pointer<SDL_Renderer>>(BasicInfo basicInfo, custom_pointer<SDL_Renderer> renderer) {
     auto ret = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_BGR565, SDL_TEXTUREACCESS_STREAMING, basicInfo.vinfo.xres, basicInfo.vinfo.yres);
     if (!ret) {
         std::cerr << "Couldn't create texture:" << SDL_GetError();
