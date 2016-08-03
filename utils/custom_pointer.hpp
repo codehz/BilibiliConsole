@@ -3,28 +3,49 @@
 class NotImplementedException {
 };
 
+class RC {
+    private:
+        int32_t count;
+    public:
+        void AddRef() {
+            count++;
+        }
+        
+        int32_t Release() {
+            return --count;
+        }
+};
+
 //JUST FOR SIMPLIFY DESTORY
 template<typename T>
 class custom_pointer {
     private:
-        T * t = nullptr;
+        T *t = nullptr;
+        RC *ref;
     public:
-        custom_pointer() : t(Create()) {}
-        template<typename ...Values> custom_pointer(Values ...v) : t(Create(v...)) {}
-        custom_pointer(const custom_pointer<T>& ref) : t(ref.t) {}
-        
-        custom_pointer<T> & operator =(const custom_pointer<T>& ref) {
-            if (ref.t != t) {
-                if (t)
-                    Destroy(t);
-                t = ref.t;
-            }
-            return *this;
+        custom_pointer() : t(Create()), ref(new RC) {
+            ref->AddRef();
+        }
+
+        template<typename ...Values> custom_pointer(Values ...v) : t(Create(v...)), ref(new RC) {
+            ref->AddRef();
+        }
+
+        custom_pointer(const custom_pointer<T>& pData) : t(pData.t), ref(pData.ref) {
+            ref->AddRef();
         }
         
-        template<typename F>
-        custom_pointer<T> & operator =(F *f) {
-            t = Create(f);
+        custom_pointer<T> & operator =(const custom_pointer<T>& pData) {
+            if (this != &pData) {
+                if (ref->Release() == 0) {
+                    Destroy(t);
+                    delete ref;
+                }
+                
+                t = pData.t;
+                ref = pData.ref;
+                ref->AddRef();
+            }
             return *this;
         }
 
@@ -33,8 +54,10 @@ class custom_pointer {
         }
 
         ~custom_pointer() {
-            if (t)
+            if (ref->Release() == 0) {
                 Destroy(t);
+                delete ref;
+            }
         }
 
         T &operator *() {

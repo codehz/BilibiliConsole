@@ -55,9 +55,11 @@ class PlayerImpl : public Player, SDLInit {
             SDL_RenderPresent(renderer);
         }
     public:
-        PlayerImpl(const PlayerHook &hook) : hook(hook), window(basicInfo), renderer(window), texture(basicInfo, renderer), vlcPlayer(nullptr) {}
+        PlayerImpl(const PlayerHook &hook) : hook(hook), window(basicInfo), renderer(window), texture(basicInfo, renderer), vlcPlayer(nullptr), mutex(), libvlc() {}
 
         void load(std::string location) {
+            //auto m = libvlc_media_new_location(libvlc, location.c_str());
+            //auto mp = libvlc_media_player_new_from_media(m);
             custom_pointer<libvlc_media_t> media(libvlc, location);
             vlcPlayer = custom_pointer<libvlc_media_player_t>(media);
             libvlc_video_set_callbacks(vlcPlayer, MAKE_CALLBACK(lock), MAKE_CALLBACK(unlock), MAKE_CALLBACK(display), this);

@@ -15,6 +15,10 @@ struct BasicInfo {
     BasicInfo() {
         int fbfd = open("/dev/fb0", O_RDWR);
         ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo);
+        if (!vinfo.xres) {
+            vinfo.xres = 800;
+            vinfo.yres = 600;
+        }
         close(fbfd);
     }
 };
