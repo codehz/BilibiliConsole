@@ -21,9 +21,14 @@ Bilibili的Linux客户端
 
 播放视频采用的库：**LibVLC**
 
+视频输出: **SDL2** *(通过 DirectFB 支持 TTY 输出, 需要自行配置 DirectFB)*
+
 *其他设定待定*
 
 项目进展披露
 ----
 - [x] 使用 LibVLC 和 SDL2 播放视频。
-- [ ] 完善播放器核心代码
+- [x] 完善播放器核心代码
+- [x] 文字输出
+- [ ] 加入弹幕功能
+- [ ] 连接Bilibili
