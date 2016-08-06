@@ -6,6 +6,20 @@
 
 namespace BilibiliConsole {
 
+struct WH {
+    int w, h;
+};
+
+struct Rect {
+    int x, y, w, h;
+};
+
+struct ITexture {};
+
+struct Color {
+    uint8_t r, g, b, a;
+};
+
 class Player {
     protected:
         Player() {};
@@ -15,9 +29,12 @@ class Player {
         virtual void pause() = 0;
         virtual void stop() = 0;
         virtual void loop() = 0;
+        virtual WH measureText(std::string text, int pt_size) = 0;
+        virtual void *renderText(std::string text, int pt_size, Color color) = 0;
+        virtual void drawTo(void *texture, Rect rect) = 0;
         //virtual const PlayerInfo &state() = 0;
 };
 
 }
 
-BilibiliConsole::Player *createPlayer(const BilibiliConsole::PlayerHook &hook);
+BilibiliConsole::Player *createPlayer(BilibiliConsole::PlayerHook &hook, std::string font_name);

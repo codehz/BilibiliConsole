@@ -2,29 +2,40 @@
 #include <iostream>
 #include <unistd.h>
 #include <string>
-#include <cstdio>
+#include <sys/stat.h>
+#include <limits.h>
+#include <libgen.h>
 
 using namespace BilibiliConsole;
 
-class DummyPlayerHook : public PlayerHook {
-    void onFrame(void *const *p_pixels) {
+struct SimplePlayerHook : public PlayerHook {
+    Player *player;
+    WH textwh;
+    void *test_text;
+    void onInit(Player *player) {
+        this->player = player;
+        textwh = player->measureText("FPS", 16);
+        test_text = player->renderText("FPS", 16, {255, 255, 0, 255});
     }
-    void onException(std::string exception) {
+    void onDestroy() const {}
+    void onDisplay(void *) const {
+        player->drawTo(test_text, {0, 0, textwh.w, textwh.h});
     }
+    void onException(std::string exception) const {}
 };
 
-std::string getCurrentWorkingDirectory() {
-    char cwd[1024];
-    if (getcwd(cwd, sizeof(cwd)) != NULL)
-        return std::string(cwd);
+std::string getDir() {
+    char dest[PATH_MAX];
+    if (readlink("/proc/self/exe", dest, PATH_MAX) != -1)
+        return std::string(dirname(dest));
     throw "Cannot getcwd";
 }
 
-int main() {
-    DummyPlayerHook hook;
-    std::shared_ptr<Player> player(createPlayer(hook));
-    printf("VLC_PLUGIN_PATH=%s\n", getenv("VLC_PLUGIN_PATH"));
-    player->load("file://" + getCurrentWorkingDirectory() + "/test.mp4");
+int main(int argc, char *argv[]) {
+    SimplePlayerHook hook;
+    std::string dir = getDir();
+    std::shared_ptr<Player> player(createPlayer(hook, dir + "/res/test.ttf"));
+    player->load("file://" + dir + "/res/test.mp4");
     player->play();
     player->loop();
 }

@@ -1,4 +1,5 @@
 find_package(SDL2 REQUIRED)
+find_package(SDL2_ttf REQUIRED)
 find_package(LIBVLC REQUIRED)
-include_directories(${SDL2_INCLUDE_DIR} $(LIBVLC_INCLUDE_DIR))
+include_directories(${SDL2_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIRS} ${LIBVLC_INCLUDE_DIR})
 add_library(player player.cpp)

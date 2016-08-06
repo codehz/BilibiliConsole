@@ -3,9 +3,13 @@
 
 namespace BilibiliConsole {
 
-class PlayerHook {
-    virtual void onFrame(void *const *p_pixels) = 0;
-    virtual void onException(std::string exception) = 0;
+struct Player;
+
+struct PlayerHook {
+    virtual void onInit(Player *) = 0;
+    virtual void onDestroy() const = 0;
+    virtual void onDisplay(void *) const = 0;
+    virtual void onException(std::string exception) const = 0;
 };
 
 }

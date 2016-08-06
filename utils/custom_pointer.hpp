@@ -1,18 +1,21 @@
 #pragma once
+#include <exception>
 
-class NotImplementedException {
+struct NotImplementedException : public std::logic_error {
 };
 
 class RC {
     private:
-        int32_t count;
+        int32_t count = 0;
     public:
         void AddRef() {
             count++;
         }
         
         int32_t Release() {
-            return --count;
+            if (--count < 0)
+                throw std::logic_error("count < 0");
+            return count;
         }
 };
 
@@ -31,13 +34,18 @@ class custom_pointer {
             ref->AddRef();
         }
 
-        custom_pointer(const custom_pointer<T>& pData) : t(pData.t), ref(pData.ref) {
+        custom_pointer(const custom_pointer<T> &pData) : t(pData.t), ref(pData.ref) {
             ref->AddRef();
         }
-        
-        custom_pointer<T> & operator =(const custom_pointer<T>& pData) {
+
+        custom_pointer(custom_pointer<T> &&pData) : t(pData.t), ref(pData.ref) {
+            pData.ref = nullptr;
+            pData.t = nullptr;
+        }
+
+        custom_pointer<T> & operator =(const custom_pointer<T> &&pData) {
             if (this != &pData) {
-                if (ref->Release() == 0) {
+                if (ref && ref->Release() == 0) {
                     Destroy(t);
                     delete ref;
                 }
@@ -49,12 +57,22 @@ class custom_pointer {
             return *this;
         }
 
+        custom_pointer<T> & operator =(custom_pointer<T> &&pData) {
+            if (this != &pData) {
+                t = pData.t;
+                ref = pData.ref;
+                pData.ref = nullptr;
+                pData.t = nullptr;
+            }
+            return *this;
+        }
+
         operator bool() {
             return t != nullptr;
         }
 
         ~custom_pointer() {
-            if (ref->Release() == 0) {
+            if (ref && ref->Release() == 0) {
                 Destroy(t);
                 delete ref;
             }
@@ -84,12 +102,17 @@ class custom_pointer {
             return t;
         }
         
-        static T *Create() {
+        T *Create() {
             return new T;
         }
 
-        static void Destroy(T *t) {
+        void Destroy(T *t) {
             delete t;
         }
 };
+
+template<typename T>
+custom_pointer<T> make_custom(T *pointer) {
+    return custom_pointer<T>(pointer);
+}
 
