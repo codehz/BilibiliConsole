@@ -14,14 +14,14 @@ enum class CommentType {
 };
 
 struct CommentBase {
-    float time;
+    double time;
     CommentType type;
     uint32_t pt_size;
     uint32_t color;
     uint64_t timestamp;
     uint32_t pool_id;
     uint32_t uid_hash;
-    uint64_t comment_id;
+    uint32_t comment_id;
     std::string content;
 };
 
@@ -33,19 +33,19 @@ struct BasicTexture {
 
 struct CommentManager {
     virtual void pushComment(const CommentBase &comment) = 0;
-    virtual void update(float time) = 0;
+    virtual void update(double time) = 0;
 };
 
 struct CommentManagerConfigure {
-    const uint32_t  maxline;
-    const uint32_t  height;
-    const uint32_t  padding;
-    const float     durations;
-    const uint32_t  viewport_width;
-    const uint32_t  viewport_height;
-    const std::function<const BasicTexture(const CommentBase &comment)>                 requestTexture;
-    const std::function<void(const BasicTexture)>                                       freeTexture;
-    const std::function<void(const BasicTexture, const float x, const float y)>   draw;
+    uint32_t  maxline;
+    uint32_t  height;
+    uint32_t  padding;
+    float     durations;
+    uint32_t  viewport_width;
+    uint32_t  viewport_height;
+    std::function<const BasicTexture(const CommentBase &comment)>                 requestTexture;
+    std::function<void(const BasicTexture)>                                       freeTexture;
+    std::function<void(const BasicTexture, const float x, const float y)>         draw;
 };
 
 CommentManager *makeCommentManager(const CommentManagerConfigure &configure);

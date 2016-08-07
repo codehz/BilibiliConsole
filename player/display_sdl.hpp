@@ -164,6 +164,10 @@ class SDLDisplay : protected SDLInit, public TextEngine {
         void drawTo(void *texture, Rect rect) {
             SDL_RenderCopy(renderer, reinterpret_cast<SDL_Texture *>(texture), nullptr, reinterpret_cast<SDL_Rect *>(&rect));
         }
+
+        void destoryTexture(void *texture) {
+            SDL_DestroyTexture(reinterpret_cast<SDL_Texture *>(texture));
+        }
 };
 
 using TargetDisplay=SDLDisplay;

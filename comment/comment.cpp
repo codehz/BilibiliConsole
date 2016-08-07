@@ -33,7 +33,7 @@ struct CommentObject {
     CommentObject(const Comment &source, const uint32_t pos, uint32_t padding, const BasicTexture texture)
         : source(source), pos(pos), padding(padding), texture(texture) {}
 
-    void updateState(const float time, const uint32_t height, const float durations, const uint32_t viewport_width, const uint32_t viewport_height) {
+    void updateState(const double time, const uint32_t height, const double durations, const uint32_t viewport_width, const uint32_t viewport_height) {
         throw std::logic_error("Should be subclass");
     }
 };
@@ -41,7 +41,7 @@ struct CommentObject {
 struct ScorllableCommentObject : public CommentObject {
     ScorllableCommentObject(const Comment &source, const uint32_t pos, uint32_t padding, const BasicTexture texture)
         : CommentObject(source, pos, padding, texture) {}
-    void updateState(const float time, const uint32_t height, const float durations, const uint32_t viewport_width, const uint32_t viewport_height) {
+    void updateState(const double time, const uint32_t height, const double durations, const uint32_t viewport_width, const uint32_t viewport_height) {
         auto offset_time = time - source.time;
         auto p = offset_time / durations;
         if (p > 1) {
@@ -58,14 +58,14 @@ struct ScorllableCommentObject : public CommentObject {
 struct ReverseScorllableCommentObject : public CommentObject {
     ReverseScorllableCommentObject(const Comment &source, const uint32_t pos, uint32_t padding, const BasicTexture texture)
         : CommentObject(source, pos, padding, texture) {}
-    void updateState(const float time, const uint32_t height, const float durations, const uint32_t viewport_width, const uint32_t viewport_height) {
+    void updateState(const double time, const uint32_t height, const double durations, const uint32_t viewport_width, const uint32_t viewport_height) {
         auto offset_time = time - source.time;
         auto p = offset_time / durations;
         if (p > 1)
             need_remove = true;
         state.x = (viewport_width + texture.width) * (1 - p) - texture.width;
         state.y = padding + height * pos;
-        state.availability = state.x + texture.width < viewport_width;
+        state.availability = (state.x + texture.width * 1.2) < viewport_width;
         return;
     }
 };
@@ -73,7 +73,7 @@ struct ReverseScorllableCommentObject : public CommentObject {
 struct StationaryCommentObject : public CommentObject {
     StationaryCommentObject(const Comment &source, const uint32_t pos, uint32_t padding, const BasicTexture texture)
         : CommentObject(source, pos, padding, texture) {}
-    void updateState(const float time, const uint32_t height, const float durations, const uint32_t viewport_width, const uint32_t viewport_height) {
+    void updateState(const double time, const uint32_t height, const double durations, const uint32_t viewport_width, const uint32_t viewport_height) {
         auto offset_time = time - source.time;
         auto p = offset_time / durations;
         if (p > 1)
@@ -88,7 +88,7 @@ struct StationaryCommentObject : public CommentObject {
 struct ReverseStationaryCommentObject : public CommentObject {
     ReverseStationaryCommentObject(const Comment &source, const uint32_t pos, uint32_t padding, const BasicTexture texture)
         : CommentObject(source, pos, padding, texture) {}
-    void updateState(const float time, const uint32_t height, const float durations, const uint32_t viewport_width, const uint32_t viewport_height) {
+    void updateState(const double time, const uint32_t height, const double durations, const uint32_t viewport_width, const uint32_t viewport_height) {
         auto offset_time = time - source.time;
         auto p = offset_time / durations;
         if (p > 1)
@@ -106,7 +106,7 @@ class BaseCommentPool {
     public:
         virtual void pushComment(const Comment &comment) = 0;
 
-        virtual void update(const float time, CommentManagerConfigure configure) = 0;
+        virtual void update(const double time, CommentManagerConfigure configure) = 0;
 };
 
 template<typename CommentObjectType>
@@ -118,14 +118,14 @@ class CommentPool : public BaseCommentPool {
             comments.push(comment);
         }
 
-        void update(const float time, CommentManagerConfigure configure) {
+        void update(const double time, CommentManagerConfigure configure) {
             std::vector<int> slots(configure.maxline, 0);
             for (auto &comment : current_comments) {
                 comment.updateState(time, configure.height, configure.durations, configure.viewport_width, configure.viewport_height);
                 configure.draw(comment.texture, comment.state.x, comment.state.y);
-                slots[comment.pos] += comment.state.availability;
+                slots[comment.pos] += 1 - comment.state.availability;
             }
-            while (current_comments.front().need_remove) {
+            while (!current_comments.empty() && current_comments.front().need_remove) {
                 configure.freeTexture(current_comments.front().texture);
                 current_comments.pop_front();
             }
@@ -133,13 +133,15 @@ class CommentPool : public BaseCommentPool {
             auto cursor = slots.begin();
             size_t drawed = current_comments.size();
             while (!comments.empty() && comments.top().time < time) {
-                while (*cursor != level)
+                while (*cursor > level) {
                     if (++cursor == slots.end()) {
                         level++;
                         cursor = slots.begin();
                     }
+                }
                 current_comments.push_back(CommentObjectType(comments.top(), cursor - slots.begin(), configure.padding, configure.requestTexture(comments.top())));
                 comments.pop();
+                if (++cursor == slots.end()) cursor = slots.begin();
             }
             for (auto it = current_comments.begin() + drawed; it != current_comments.end(); ++it) {
                 it->updateState(time, configure.height, configure.durations, configure.viewport_width, configure.viewport_height);
@@ -168,7 +170,7 @@ class CommentManagerImpl : public CommentManager {
             }
         }
 
-        void update(float time) {
+        void update(double time) {
             for (const auto &pool : pools)
                 pool.second->update(time, configure);
         }

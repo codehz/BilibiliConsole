@@ -18,7 +18,7 @@ struct SimplePlayerHook : public PlayerHook {
         test_text = player->renderText("FPS", 16, {255, 255, 0, 255});
     }
     void onDestroy() const {}
-    void onDisplay(void *) const {
+    void onDisplay(float fps, float time) const {
         player->drawTo(test_text, {0, 0, textwh.w, textwh.h});
     }
     void onException(std::string exception) const {}
@@ -34,7 +34,8 @@ std::string getDir() {
 int main(int argc, char *argv[]) {
     SimplePlayerHook hook;
     std::string dir = getDir();
-    std::shared_ptr<Player> player(createPlayer(hook, dir + "/res/test.ttf"));
+    std::shared_ptr<Player> player(createPlayer(dir + "/res/test.ttf"));
+    player->registerHook(&hook);
     player->load("file://" + dir + "/res/test.mp4");
     player->play();
     player->loop();

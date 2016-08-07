@@ -18,7 +18,7 @@ using vlc_display = void (*)(void *, void *id);
 template <typename SepcialDisplay>
 class PlayerImpl : public Player, protected SepcialDisplay {
     private:
-        const PlayerHook &                      hook;
+        const PlayerHook *                      hook;
         BasicInfo                               basicInfo;
         custom_pointer<libvlc_instance_t>       libvlc;
         custom_pointer<libvlc_media_player_t>   vlcPlayer;
@@ -34,7 +34,7 @@ class PlayerImpl : public Player, protected SepcialDisplay {
 
         void display(void *id) {
             SepcialDisplay::doDisplay();
-            hook.onDisplay(SepcialDisplay::renderer);
+            if (hook) hook->onDisplay(libvlc_media_player_get_fps(vlcPlayer), libvlc_media_player_get_time(vlcPlayer) / 1000.0);
             SepcialDisplay::doSubmit();
         }
 
@@ -42,8 +42,12 @@ class PlayerImpl : public Player, protected SepcialDisplay {
             playerState = libvlc_media_player_get_state(vlcPlayer);
         }
     public:
-        PlayerImpl(PlayerHook &hook, std::string font_name) : hook(hook), SepcialDisplay(font_name), libvlc(), vlcPlayer(nullptr) {
-            hook.onInit(this);
+        PlayerImpl(std::string font_name) : hook(nullptr), SepcialDisplay(font_name), libvlc(), vlcPlayer(nullptr) {
+        }
+        
+        void registerHook(BilibiliConsole::PlayerHook *hook) {
+            this->hook = hook;
+            if (hook) hook->onInit(this);
         }
 
         void load(std::string location) {
@@ -83,12 +87,16 @@ class PlayerImpl : public Player, protected SepcialDisplay {
         void drawTo(void *texture, Rect rect) {
             return SepcialDisplay::drawTo(texture, rect);
         }
+
+        void destoryTexture(void *texture) {
+            return SepcialDisplay::destoryTexture(texture);
+        }
 };
 
 }
 
-BilibiliConsole::Player *createPlayer(BilibiliConsole::PlayerHook &hook, std::string font_name) {
-    return new BilibiliConsole::PlayerImpl<BilibiliConsole::TargetDisplay>(hook, font_name);
+BilibiliConsole::Player *createPlayer(std::string font_name) {
+    return new BilibiliConsole::PlayerImpl<BilibiliConsole::TargetDisplay>(font_name);
 }
 
 #undef MAKE_CALLBACK
