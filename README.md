@@ -3,6 +3,8 @@ Bilibili的Linux客户端
 
 由知乎用户[@躺糖](https://www.zhihu.com/people/jixian-li)的[回答](https://www.zhihu.com/question/49137033/answer/114490277)启发，准备写一个基于FrameBuffer的BiliBili视频播放器。
 
+![Screenshot](https://github.com/codehz/BilibiliConsole/raw/master/bilibili.PNG)
+
 功能设想
 ----
 
