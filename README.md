@@ -32,5 +32,5 @@ Bilibili的Linux客户端
 - [x] 使用 LibVLC 和 SDL2 播放视频。
 - [x] 完善播放器核心代码
 - [x] 文字输出
-- [ ] 加入弹幕功能
+- [x] 加入弹幕功能
 - [ ] 连接Bilibili
