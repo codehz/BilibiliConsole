@@ -37,17 +37,26 @@ struct CommentManager {
 };
 
 struct CommentManagerConfigure {
-    uint32_t  maxline;
-    uint32_t  height;
-    uint32_t  padding;
-    float     durations;
-    uint32_t  viewport_width;
-    uint32_t  viewport_height;
-    std::function<const BasicTexture(const CommentBase &comment)>                 requestTexture;
-    std::function<void(const BasicTexture)>                                       freeTexture;
-    std::function<void(const BasicTexture, const float x, const float y)>         draw;
+    const uint32_t  maxline;
+    const uint32_t  height;
+    const uint32_t  padding;
+    const float     durations;
+    const uint32_t  viewport_width;
+    const uint32_t  viewport_height;
+    CommentManagerConfigure(
+        const uint32_t  maxline,
+        const uint32_t  height,
+        const uint32_t  padding,
+        const float     durations,
+        const uint32_t  viewport_width,
+        const uint32_t  viewport_height
+    );
+    virtual float scale(float width) const = 0;
+    virtual BasicTexture requestTexture(const CommentBase &comment) const = 0;
+    virtual void freeTexture(const BasicTexture) const = 0;
+    virtual void draw(const BasicTexture, const float x, const float y) const = 0;
 };
 
-CommentManager *makeCommentManager(const CommentManagerConfigure &configure);
+CommentManager *makeCommentManager(const CommentManagerConfigure *configure);
 
 }

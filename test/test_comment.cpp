@@ -66,22 +66,32 @@ done:
 	return ((s - _s) - count);
 }
 
-Bilibili::CommentManagerConfigure configure = {
-    .maxline = 30,
-    .height = 30,
-    .padding = 2,
-    .durations = 6.0f,
-    .viewport_width = 800,
-    .viewport_height = 600,
-    .requestTexture = [](const Bilibili::CommentBase &comment) -> Bilibili::BasicTexture {
+struct MyConfigure : public Bilibili::CommentManagerConfigure {
+    MyConfigure() :
+        Bilibili::CommentManagerConfigure(
+            20,  // maxline
+            30,  // height
+            2,   // padding
+            6.0f,// durations
+            800, // viewport_width
+            600  // viewport_height
+        ) {}
+
+    float scale(float width) const {
+        return width * width * 1.2f;
+    }
+
+    Bilibili::BasicTexture requestTexture(const Bilibili::CommentBase &comment) const {
         char *cp = new char[comment.content.size() + 1];
         strcpy(cp, comment.content.c_str());
         return {(void *)cp, cp_strlen_utf8(cp) * 8, 16};
-    },
-    .freeTexture = [](const Bilibili::BasicTexture &texture) {
+    }
+
+    void freeTexture(const Bilibili::BasicTexture texture) const {
         free(texture.texture);
-    },
-    .draw = [](const Bilibili::BasicTexture texture, const float x, const float y) {
+    }
+
+    void draw(const Bilibili::BasicTexture texture, const float x, const float y) const {
         std::cout << "x: " << std::setw(8)  << (int32_t)x << ", y: " << std::setw(8) << (int32_t)y << " content:" << texture.texture << ":" << (char *)texture.texture << std::endl;
     }
 };
@@ -94,7 +104,8 @@ std::string getDir() {
 }
 
 int main() {
-    Bilibili::CommentManager *cm = Bilibili::makeCommentManager(configure);
+    MyConfigure configure;
+    Bilibili::CommentManager *cm = Bilibili::makeCommentManager(&configure);
     auto cbs = Bilibili::comment_parse(getDir() + "/res/test.xml");
     while (!cbs.empty()) {
         cm->pushComment(cbs.front());
